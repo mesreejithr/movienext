@@ -1,0 +1,8 @@
+npx create-next-app@latest indian-ott-platform
+cd indian-ott-platform
+npm install @reduxjs/toolkit react-redux axios next-auth @heroicons/react
+npm install -D tailwindcss postcss autoprefixer
+npx tailwindcss init -p 
+rm -rf src/pages 
+npm run dev 
+npm install date-fns 
