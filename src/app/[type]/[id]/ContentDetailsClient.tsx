@@ -139,7 +139,11 @@ export default function ContentDetailsClient({ type, id }: ContentDetailsClientP
 
             {/* Release Date & Runtime */}
             <div className="mb-4 text-gray-300">
-              <span>{new Date(details.release_date || details.first_air_date || '').getFullYear()}</span>
+              {(details.release_date || details.first_air_date) && (
+                <span>
+                  {new Date(details.release_date || details.first_air_date || '').getFullYear()}
+                </span>
+              )}
               {details.runtime && (
                 <span> • {Math.floor(details.runtime / 60)}h {details.runtime % 60}m</span>
               )}

@@ -110,7 +110,7 @@ export default function Navbar({ toggleDarkMode, isDarkMode }: NavbarProps) {
                   {item.poster_path ? (
                     <Image
                       src={tmdbConfig.w500Image(item.poster_path)}
-                      alt={item.title || item.name}
+                      alt={item.title || item.name || 'Movie poster'}
                       width={40}
                       height={60}
                       className="rounded"
@@ -121,9 +121,11 @@ export default function Navbar({ toggleDarkMode, isDarkMode }: NavbarProps) {
                     </div>
                   )}
                   <div className="ml-3">
-                    <div className="text-white font-medium">{item.title || item.name}</div>
+                    <div className="text-white font-medium">{item.title || item.name || 'Untitled'}</div>
                     <div className="text-sm text-gray-400">
-                      {new Date(item.release_date || item.first_air_date).getFullYear()}
+                      {(item.release_date || item.first_air_date) 
+                        ? new Date(item.release_date || item.first_air_date || '').getFullYear()
+                        : 'Release date unknown'}
                     </div>
                   </div>
                 </Link>

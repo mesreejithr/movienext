@@ -19,6 +19,26 @@ const INDIAN_OTT_PROVIDERS = [
   122, // Voot
 ];
 
+interface TMDBResponse<T> {
+  results: T[];
+  total_results: number;
+  total_pages: number;
+}
+
+interface ContentItem {
+  id: number;
+  title?: string;
+  name?: string;
+  poster_path: string;
+  backdrop_path?: string;
+  vote_average: number;
+  media_type?: 'movie' | 'tv';
+  release_date?: string;
+  first_air_date?: string;
+  original_language?: string;
+  origin_country?: string[];
+}
+
 export const tmdbConfig = {
   apiKey: TMDB_API_KEY,
   baseUrl: TMDB_BASE_URL,
@@ -28,7 +48,7 @@ export const tmdbConfig = {
 };
 
 export const tmdbApi = {
-  getIndianContent: async (type: 'movie' | 'tv', page = 1) => {
+  getIndianContent: async (type: 'movie' | 'tv', page = 1): Promise<TMDBResponse<ContentItem>> => {
     const response = await fetch(
       `${TMDB_BASE_URL}/discover/${type}?api_key=${TMDB_API_KEY}&` +
       `with_original_language=hi|ta|te|ml|bn|kn&` +
@@ -184,7 +204,7 @@ export const tmdbApi = {
     return response.json();
   },
 
-  searchIndianContent: async (query: string) => {
+  searchIndianContent: async (query: string): Promise<TMDBResponse<ContentItem>> => {
     try {
       // First get the multi-search results
       const response = await fetch(

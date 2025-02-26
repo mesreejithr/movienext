@@ -9,7 +9,7 @@ interface SearchResult {
   id: number;
   title?: string;
   name?: string;
-  poster_path?: string;
+  poster_path: string;
   media_type?: 'movie' | 'tv';
   release_date?: string;
   first_air_date?: string;
@@ -59,13 +59,15 @@ export default function SearchPage() {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
-        Search Results for "{query}"
+        Search Results for &quot;{query}&quot;
       </h1>
       {results.length > 0 ? (
-        <ContentGrid items={results} />
+        <ContentGrid 
+          items={results.filter(item => item.poster_path)}
+        />
       ) : (
         <div className="text-center py-12 text-gray-500">
-          No results found for "{query}"
+          No results found for &quot;{query}&quot;
         </div>
       )}
     </div>
