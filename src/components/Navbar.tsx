@@ -12,6 +12,16 @@ interface NavbarProps {
   isDarkMode: boolean;
 }
 
+interface SearchResult {
+  id: number;
+  title?: string;
+  name?: string;
+  poster_path?: string;
+  media_type?: 'movie' | 'tv';
+  release_date?: string;
+  first_air_date?: string;
+}
+
 const Logo = () => (
   <div className="flex items-center">
     <Link href="/" className="flex items-center">
@@ -28,7 +38,7 @@ const Logo = () => (
 
 export default function Navbar({ toggleDarkMode, isDarkMode }: NavbarProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const router = useRouter();
 
@@ -85,7 +95,7 @@ export default function Navbar({ toggleDarkMode, isDarkMode }: NavbarProps) {
           {/* Search Results Dropdown */}
           {searchResults.length > 0 && (
             <div className="absolute top-full left-0 right-0 mt-2 bg-gray-800 rounded-lg shadow-xl z-50 max-h-96 overflow-y-auto">
-              {searchResults.map((item: any) => (
+              {searchResults.map((item: SearchResult) => (
                 <Link
                   key={item.id}
                   href={`/${item.media_type || 'movie'}/${item.id}`}

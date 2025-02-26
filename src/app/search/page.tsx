@@ -5,10 +5,29 @@ import { useSearchParams } from 'next/navigation';
 import { tmdbApi } from '@/utils/tmdb';
 import ContentGrid from '@/components/ContentGrid';
 
+interface SearchResult {
+  id: number;
+  title?: string;
+  name?: string;
+  poster_path?: string;
+  media_type?: 'movie' | 'tv';
+  release_date?: string;
+  first_air_date?: string;
+  vote_average: number;
+  watch_providers?: {
+    flatrate?: Array<{
+      provider_id: number;
+      provider_name: string;
+      logo_path: string;
+    }>;
+    link?: string;
+  };
+}
+
 export default function SearchPage() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q');
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {

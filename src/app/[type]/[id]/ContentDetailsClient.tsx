@@ -9,6 +9,27 @@ interface ContentDetailsClientProps {
   id: string;
 }
 
+interface TMDBResponse {
+  results: Array<{
+    id: number;
+    title?: string;
+    name?: string;
+    // ... other properties
+  }>;
+  total_results: number;
+}
+
+interface ReleaseDate {
+  type: number;
+  release_date: string;
+  iso_3166_1: string;
+}
+
+interface IndianReleases {
+  iso_3166_1: string;
+  release_dates: ReleaseDate[];
+}
+
 interface MovieDetails {
   id: number;
   title?: string;
@@ -29,6 +50,9 @@ interface MovieDetails {
       profile_path: string | null;
     }>;
   };
+  release_dates?: {
+    results: IndianReleases[];
+  };
   'watch/providers'?: {
     results: {
       IN?: {
@@ -36,7 +60,6 @@ interface MovieDetails {
           provider_id: number;
           provider_name: string;
           logo_path: string;
-          link?: string;
         }>;
         link: string;
       };
