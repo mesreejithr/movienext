@@ -6,6 +6,12 @@ interface Provider {
   provider_id: number;
   provider_name: string;
   logo_path: string;
+}
+
+interface WatchProviders {
+  flatrate?: Provider[];
+  rent?: Provider[];
+  buy?: Provider[];
   link?: string;
 }
 
@@ -18,11 +24,7 @@ interface ContentItem {
   media_type?: 'movie' | 'tv';
   release_date?: string;
   first_air_date?: string;
-  watch_providers?: {
-    flatrate?: Provider[];
-    rent?: Provider[];
-    buy?: Provider[];
-  };
+  watch_providers?: WatchProviders;
   in_theaters?: boolean;
   theatrical_release_date?: string;
   digital_release_date?: string;

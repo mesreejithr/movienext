@@ -4,6 +4,12 @@ import { useEffect, useState } from 'react';
 import { tmdbApi } from '@/utils/tmdb';
 import ContentGrid from './ContentGrid';
 
+interface Provider {
+  provider_id: number;
+  provider_name: string;
+  logo_path: string;
+}
+
 interface ContentItem {
   id: number;
   title?: string;
@@ -18,11 +24,8 @@ interface ContentItem {
   theatrical_release_date?: string;
   digital_release_date?: string;
   watch_providers?: {
-    flatrate?: Array<{
-      provider_id: number;
-      provider_name: string;
-      logo_path: string;
-    }>;
+    flatrate?: Array<Provider>;
+    link?: string;
   };
 }
 

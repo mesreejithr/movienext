@@ -6,6 +6,12 @@ import ContentGrid from '@/components/ContentGrid';
 import LanguageFilter from '@/components/LanguageFilter';
 import TrendingSection from '@/components/TrendingSection';
 
+interface Provider {
+  provider_id: number;
+  provider_name: string;
+  logo_path: string;
+}
+
 interface ContentItem {
   id: number;
   title?: string;
@@ -17,6 +23,7 @@ interface ContentItem {
   release_date?: string;
   first_air_date?: string;
   in_theaters?: boolean;
+  digital_release_date?: string;
   release_details?: {
     release_dates: Array<{
       type: number;
@@ -24,21 +31,10 @@ interface ContentItem {
     }>;
   };
   watch_providers?: {
-    flatrate?: Array<{
-      provider_id: number;
-      provider_name: string;
-      logo_path: string;
-    }>;
-    rent?: Array<{
-      provider_id: number;
-      provider_name: string;
-      logo_path: string;
-    }>;
-    buy?: Array<{
-      provider_id: number;
-      provider_name: string;
-      logo_path: string;
-    }>;
+    flatrate?: Array<Provider>;
+    rent?: Array<Provider>;
+    buy?: Array<Provider>;
+    link?: string;
   };
 }
 
