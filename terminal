@@ -5,4 +5,3 @@ npm install -D tailwindcss postcss autoprefixer
 npx tailwindcss init -p 
 rm -rf src/pages 
 npm run dev 
-npm install date-fns 

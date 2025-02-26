@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { tmdbApi } from '@/utils/tmdb';
 import ContentGrid from '@/components/ContentGrid';
 import LanguageFilter from '@/components/LanguageFilter';
+import TrendingSection from '@/components/TrendingSection';
 
 interface ContentItem {
   id: number;
@@ -12,61 +13,96 @@ interface ContentItem {
   poster_path: string;
   vote_average: number;
   media_type?: 'movie' | 'tv';
-  original_language: string;
+  original_language?: string;
   release_date?: string;
   first_air_date?: string;
-  ['watch/providers']?: {
-    results: {
-      IN?: {
-        flatrate?: Array<{
-          provider_id: number;
-          provider_name: string;
-          logo_path: string;
-        }>;
-      };
-    };
+  in_theaters?: boolean;
+  release_details?: {
+    release_dates: Array<{
+      type: number;
+      release_date: string;
+    }>;
+  };
+  watch_providers?: {
+    flatrate?: Array<{
+      provider_id: number;
+      provider_name: string;
+      logo_path: string;
+    }>;
+    rent?: Array<{
+      provider_id: number;
+      provider_name: string;
+      logo_path: string;
+    }>;
+    buy?: Array<{
+      provider_id: number;
+      provider_name: string;
+      logo_path: string;
+    }>;
   };
 }
 
 export default function Home() {
-  const [ottMovies, setOttMovies] = useState<ContentItem[]>([]);
-  const [ottShows, setOttShows] = useState<ContentItem[]>([]);
-  const [theatreReleases, setTheatreReleases] = useState<ContentItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [ottReleases, setOttReleases] = useState<ContentItem[]>([]);
+  const [theatricalReleases, setTheatricalReleases] = useState<ContentItem[]>([]);
   const [selectedLanguage, setSelectedLanguage] = useState('all');
-
-  const fetchContent = async (language?: string) => {
-    try {
-      setIsLoading(true);
-      const [ottMoviesData, ottShowsData, theatreData] = await Promise.all([
-        language === 'all'
-          ? tmdbApi.getLatestOTTReleases('movie')
-          : tmdbApi.getContentByLanguage('movie', language || 'hi'),
-        language === 'all'
-          ? tmdbApi.getLatestOTTReleases('tv')
-          : tmdbApi.getContentByLanguage('tv', language || 'hi'),
-        language === 'all'
-          ? tmdbApi.getLatestTheatreReleases()
-          : tmdbApi.getLatestTheatreReleases(),
-      ]);
-
-      setOttMovies(ottMoviesData.results || []);
-      setOttShows(ottShowsData.results || []);
-      setTheatreReleases(theatreData.results || []);
-    } catch (error) {
-      console.error('Error fetching content:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const [isLoading, setIsLoading] = useState(true);
+  const [allOttContent, setAllOttContent] = useState<ContentItem[]>([]);
+  const [allTheatricalContent, setAllTheatricalContent] = useState<ContentItem[]>([]);
 
   useEffect(() => {
-    fetchContent(selectedLanguage);
-  }, [selectedLanguage]);
+    const fetchContent = async () => {
+      try {
+        setIsLoading(true);
+        
+        const [theatricalData, ottMoviesData, ottSeriesData] = await Promise.all([
+          tmdbApi.getTheatricalReleases(),
+          tmdbApi.getLatestOTTReleases(60),
+          tmdbApi.getLatestTVSeries(60)
+        ]);
 
-  const handleLanguageChange = (language: string) => {
-    setSelectedLanguage(language);
-  };
+        // Store all content
+        setAllTheatricalContent(theatricalData.results || []);
+        
+        // Combine and sort OTT content
+        const combinedOttContent = [
+          ...(ottMoviesData.results || []),
+          ...(ottSeriesData.results || [])
+        ].sort((a, b) => {
+          const dateA = new Date(a.digital_release_date || a.release_date || a.first_air_date || '');
+          const dateB = new Date(b.digital_release_date || b.release_date || b.first_air_date || '');
+          return dateB.getTime() - dateA.getTime();
+        });
+
+        setAllOttContent(combinedOttContent);
+        
+        // Initialize with all content
+        setOttReleases(combinedOttContent);
+        setTheatricalReleases(theatricalData.results || []);
+      } catch (error) {
+        console.error('Error fetching content:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchContent();
+  }, []);
+
+  useEffect(() => {
+    // Filter content when language changes
+    const filterContent = () => {
+      const filterByLanguage = (content: ContentItem[]) => {
+        if (selectedLanguage === 'all') return content;
+        return content.filter(item => item.original_language === selectedLanguage);
+      };
+
+      setOttReleases(filterByLanguage(allOttContent));
+      setTheatricalReleases(filterByLanguage(allTheatricalContent));
+    };
+
+    filterContent();
+  }, [selectedLanguage, allOttContent, allTheatricalContent]);
 
   if (isLoading) {
     return (
@@ -80,39 +116,47 @@ export default function Home() {
   }
 
   return (
-    <main className="px-4 py-6">
-      <LanguageFilter onLanguageChange={handleLanguageChange} />
-      
-      <section className="mb-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">Latest OTT Releases</h2>
-          <div className="flex space-x-4">
-            <button className="text-primary hover:underline">View All</button>
-          </div>
+    <main className="space-y-8">
+      <div className="sticky top-0 z-10 bg-white dark:bg-secondary py-4 shadow-md">
+        <LanguageFilter
+          selectedLanguage={selectedLanguage}
+          onLanguageChange={setSelectedLanguage}
+        />
+      </div>
+
+      <TrendingSection selectedLanguage={selectedLanguage} />
+
+      <section className="pt-8">
+        <div className="relative inline-block">
+          <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-wide drop-shadow-lg">
+            Latest on OTT Platforms 📺
+          </h2>
+          <div className="absolute -bottom-4 left-0 w-1/3 h-1 bg-gradient-to-r from-red-600 to-transparent rounded-full"></div>
         </div>
-        
-        <div className="space-y-8">
-          <div>
-            <h3 className="text-xl font-semibold mb-4">Movies</h3>
-            <ContentGrid items={ottMovies} />
-          </div>
-          
-          <div>
-            <h3 className="text-xl font-semibold mb-4">TV Shows & Web Series</h3>
-            <ContentGrid items={ottShows} />
-          </div>
+        <div className="mt-8">
+          {ottReleases.length > 0 ? (
+            <ContentGrid items={ottReleases} showStatusBadge={false} />
+          ) : (
+            <div className="text-center py-8 text-gray-300">
+              No content available for selected language
+            </div>
+          )}
         </div>
       </section>
 
-      <section className="mb-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">Latest Theatre Releases</h2>
-          <div className="flex space-x-4">
-            <button className="text-primary hover:underline">View All</button>
+      {theatricalReleases.length > 0 && (
+        <section className="pt-8">
+          <div className="relative inline-block">
+            <h2 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-wide drop-shadow-lg">
+              Now in Theaters 🎬
+            </h2>
+            <div className="absolute -bottom-4 left-0 w-1/3 h-1 bg-gradient-to-r from-red-600 to-transparent rounded-full"></div>
           </div>
-        </div>
-        <ContentGrid items={theatreReleases} />
-      </section>
+          <div className="mt-8">
+            <ContentGrid items={theatricalReleases} showStatusBadge={false} />
+          </div>
+        </section>
+      )}
     </main>
   );
 }
